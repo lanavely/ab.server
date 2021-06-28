@@ -127,6 +127,8 @@ packages/
 csx/
 *.build.csdef
 
+.idea
+
 # Windows Store app package directory
 AppPackages/
 
