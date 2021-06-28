@@ -17,7 +17,6 @@ namespace Server
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
@@ -29,14 +28,10 @@ namespace Server
             });
             services.AddCors(options =>
             {
-                options.AddPolicy("AllAllowed",
-                    builder => { builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod(); });
-                options.AddPolicy("Heroku",
-                    builder => { builder.WithOrigins("abtestproject.heroku.com").AllowAnyHeader().AllowAnyMethod(); });
+                options.AddDefaultPolicy(builder => { builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();});
             });
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ApplicationContext ctx)
         {
             if (env.IsDevelopment())
@@ -50,7 +45,7 @@ namespace Server
 
             app.UseRouting();
 
-            app.UseCors(env.IsDevelopment() ? "AllAllowed" : "Heroku");
+            app.UseCors();
 
             app.UseAuthorization();
 
