@@ -15,6 +15,17 @@ namespace DataStorage.EF
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            
+            modelBuilder
+                .Entity<User>()
+                .Property(e => e.DateRegistration)
+                .HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+            
+            modelBuilder
+                .Entity<User>()
+                .Property(e => e.DateLastActivity)
+                .HasConversion(v => v, v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+            
             modelBuilder.Entity<User>()
                 .HasData(
                     new User {Id = 1, DateRegistration = new (2021, 6, 16), DateLastActivity = new (2021, 6, 24)},
