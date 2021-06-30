@@ -25,33 +25,28 @@ namespace Server.Controllers
         [HttpGet("rolling/{x}")]
         public async Task<double> GetRollingAsync(uint x)
         {
-            var fromDate = DateTime.Today - TimeSpan.FromDays(x);
+            var allMatch = await _db.Users.CountAsync(u => u.DateLastActivity - u.DateRegistration >= TimeSpan.FromDays(x));
+            var all = await _db.Users.CountAsync();
 
-            var allBeforeDate = await _db.Users.CountAsync(u => u.DateRegistration <= fromDate);
-            var activeAfterDate = await _db.Users.CountAsync(u =>
-                u.DateLastActivity >= fromDate && u.DateRegistration <= fromDate);
-
-            if (allBeforeDate == 0)
+            if (all == 0)
                 return 0;
             
-            return 100.0 * activeAfterDate / allBeforeDate;
+            return 100.0 * allMatch / all;
         }
 
         public record LifeDuration
         {
-            public int? UserId { get; set; }
-            public string Duration { get; set; }
+            public int Value { get; set; }
+            public int Count { get; set; }
         }
 
         [HttpGet("lifedurations")]
         public async Task<IEnumerable<LifeDuration>> GetLifeDurationsAsync()
         {
-            var users = await _db.Users.ToListAsync();
-            return users.Select(u => new LifeDuration()
-            {
-                UserId = u.Id,
-                Duration = (u.DateLastActivity - u.DateRegistration).ToString()
-            });
+            return (await _db.Users
+                .GroupBy(p => (p.DateLastActivity - p.DateRegistration).Days)
+                .Select(g => new {Value = g.Key, Count = g.Count()} )
+                .ToListAsync()).Select(i => new LifeDuration{Value = i.Value, Count = i.Count});
         }
         
     }
